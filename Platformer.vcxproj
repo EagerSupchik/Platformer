@@ -130,7 +130,8 @@
     <ClCompile Include="Platformer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Level.bin" />
+    <None Include="1_level.data" />
+    <None Include="1_Level.map" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

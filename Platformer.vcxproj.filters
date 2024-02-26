@@ -21,7 +21,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Level.bin">
+    <None Include="1_level.data">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+    <None Include="1_Level.map">
       <Filter>Файлы ресурсов</Filter>
     </None>
   </ItemGroup>

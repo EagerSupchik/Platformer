@@ -1,7 +1,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Entity.h"
+#include <vector>
 #include <fstream>
+#include <map>
 using namespace std;
+using namespace sf;
 
 class Level
 {
@@ -9,72 +13,102 @@ public:
 	int H;
 	int W;
 	int b_s;
-	char Map[12][80];
+	RectangleShape font;
+	Texture font_texture;
+	vector<string> Map;
+	string next_lvl;
+	bool to_next_lvl = false;
 
+
+	Level() : H{ 0 }, W{ 0 }, b_s{ 0 } {}
 	
-	Level()
+	void Load_map(string lvl_name)
 	{
-		H = 12;
-		W = 80;
-		b_s = 85;
+		string map_path = lvl_name + ".map";
+		string map_settings = lvl_name + ".data";
+
+		font_texture.loadFromFile(lvl_name + "_font" + ".png");
+		font.setSize(Vector2f(1920, 1080));
+		font.setTexture(&font_texture);
+
+		ofstream pl_sv("player.data");
+		if (!pl_sv.eof())pl_sv << lvl_name;
+
+		ifstream f_map(map_path);
+		string buff;
+		Map.clear();
+
+		while (!f_map.eof())
+		{
+			getline(f_map, buff);
+			Map.push_back(buff);
+		}
+
+		ifstream f_sett(map_settings);
+
+		for (int i = 1; i <= 4; i++)
+		{
+			if (!f_sett.eof())
+			{
+				getline(f_sett, buff);
+
+				switch (i)
+				{
+				case 1:
+					H = stoi(buff);
+					break;
+				case 2:
+					W = stoi(buff);
+					break;
+				case 3:
+					b_s = stoi(buff);
+					break;
+				case 4:
+					next_lvl = buff;
+					break;
+				}
+			}
+		}
 	}
-	
 
-	Level(int H, int W, int b_s, char Map) : H{H}, W{W}, b_s{b_s}, Map{Map} {}
 
-	~Level()
+	void mapDisplay(RectangleShape& wall, RenderWindow& win, int offset_x, int offset_y)
 	{
-		cout << "object lvl was deleted!" << endl;
+		Texture grass_texture;
+		Texture portal_texture;
+		Texture old_block;
+		old_block.loadFromFile("block.jpg");
+		grass_texture.loadFromFile("grass.png");
+		portal_texture.loadFromFile("portal.png");
+		win.draw(font);
+
+		for (int i = 0; i < Map.size(); i++)
+		{
+			for (int j = 0; j < Map[i].size(); j++)
+			{
+				if (Map[i][j] == 'L')
+				{
+					wall.setTexture(&portal_texture);
+				}
+				if (Map[i][j] == 'W')
+				{
+					wall.setTexture(&grass_texture);
+				}
+				if (Map[i][j] == 'S')
+				{
+					wall.setTexture(&old_block);
+				}
+				if (Map[i][j] == 'B')
+				{
+					wall.setTexture(&grass_texture);
+				}
+				if (Map[i][j] == 'E')continue;
+				if (Map[i][j] == 'P')continue;
+				if (Map[i][j] == '0')continue;
+				if (Map[i][j] == ' ')continue;
+				wall.setPosition(j * b_s - offset_x, i * b_s - offset_y);
+				win.draw(wall);
+			}
+		}
 	}
-
-	//char Map[12][80] = {
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', 'W', 'W', 'W', 'W', 'W', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', 'W', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', 'W', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', 'W', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', 'W', 'W', ' ', ' ', ' ', ' ', ' ', 'W', 'W', 'W', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', 'W', 'W', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'0', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', 'W', 'W', 'W', 'W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '0',
-	//'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'
-	//};
-
-	//string TileMap[12] = {
-	//"0                                WWWWWWW                                       0",
-	//"0                                W     W                                       0",
-	//"0                                W     W                                       0",
-	//"0                                W     W                                       0",
-	//"0                                W    WW                                       0",
-	//"0                             WWWW     W                                       0",
-	//"0                                W     W                                       0",
-	//"0BB            W                 WW    W                                       0",
-	//"0              WW                W    WW                                       0",
-	//"0              WWW                                                             0",
-	//"0              WWWW                                                            0",
-	//"WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
-	//};
 };
-
-
-int map_to_file(Level& lvl)
-{
-	string path = "Level.bin";
-
-	ofstream fout;
-	fout.open(path, ofstream::out);
-	fout.close();
-	fout.open(path, ofstream::app);
-	if (!fout.is_open())
-	{
-		cout << "error open" << endl;
-		return -1;
-	}
-	else cout << "opened!" << endl;
-	fout.write((char*)&lvl, sizeof(Level));
-	fout.close();
-
-	return 0;
-}
