@@ -7,6 +7,7 @@ class Entity
 {
 public:
 
+	bool win = false; //проверка на победу
 	float mx, my; // переменные передвижения
 	FloatRect hitbox; // хитбокс объекта
 	bool on_ground; // проверка "на земле"
@@ -18,7 +19,7 @@ public:
 		for (int i = hitbox.top / lvl.b_s; i < (hitbox.top + hitbox.height) / lvl.b_s; i++)
 			for (int j = hitbox.left / lvl.b_s; j < (hitbox.left + hitbox.width) / lvl.b_s; j++)
 			{
-				if (lvl.Map[i][j] == 'W' || lvl.Map[i][j] == 'B' || lvl.Map[i][j] == 'S' || lvl.Map[i][j] == '0' || lvl.Map[i][j] == 'B')
+				if (lvl.Map[i][j] == 'W' ||  lvl.Map[i][j] == 'S' || lvl.Map[i][j] == '0')
 				{
 					if ((mx > 0) && (dir == 0)) hitbox.left = j * lvl.b_s - hitbox.width;
 					if ((mx < 0) && (dir == 0)) hitbox.left = j * lvl.b_s + lvl.b_s;
@@ -40,6 +41,14 @@ public:
 					if (Keyboard::isKeyPressed(Keyboard::E))
 					{
 						lvl.to_next_lvl = true;
+					}
+				}
+
+				if (lvl.Map[i][j] == 'I')
+				{
+					if (Keyboard::isKeyPressed(Keyboard::E))
+					{
+						win = true;
 					}
 				}
 
@@ -97,7 +106,7 @@ public:
 		 	shield = false;
 		}
 
-		if (respawn < 2)
+		if (respawn < 5)
 		{
 			respawn += time * 0.002;
 		}

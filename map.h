@@ -24,14 +24,14 @@ public:
 	
 	void Load_map(string lvl_name)
 	{
-		string map_path = lvl_name + ".map";
-		string map_settings = lvl_name + ".data";
+		string map_path = "Assets/Map/settings/" +lvl_name + ".map";
+		string map_settings = "Assets/Map/settings/" + lvl_name + ".data";
 
-		font_texture.loadFromFile(lvl_name + "_font" + ".png");
+		font_texture.loadFromFile("Assets/Map/fonts/" + lvl_name + "_font" + ".png");
 		font.setSize(Vector2f(1920, 1080));
 		font.setTexture(&font_texture);
 
-		ofstream pl_sv("player.data");
+		ofstream pl_sv("Assets/Player/player.data");
 		if (!pl_sv.eof())pl_sv << lvl_name;
 
 		ifstream f_map(map_path);
@@ -77,16 +77,16 @@ public:
 		Texture grass_texture;
 		Texture portal_texture;
 		Texture old_block;
-		old_block.loadFromFile("block.jpg");
-		grass_texture.loadFromFile("grass.png");
-		portal_texture.loadFromFile("portal.png");
+		old_block.loadFromFile("Assets/Map/textures/block.png");
+		grass_texture.loadFromFile("Assets/Map/textures/grass.png");
+		portal_texture.loadFromFile("Assets/Map/textures/portal.png");
 		win.draw(font);
 
 		for (int i = 0; i < Map.size(); i++)
 		{
 			for (int j = 0; j < Map[i].size(); j++)
 			{
-				if (Map[i][j] == 'L')
+				if (Map[i][j] == 'L' || Map[i][j] == 'I')
 				{
 					wall.setTexture(&portal_texture);
 				}
@@ -97,10 +97,6 @@ public:
 				if (Map[i][j] == 'S')
 				{
 					wall.setTexture(&old_block);
-				}
-				if (Map[i][j] == 'B')
-				{
-					wall.setTexture(&grass_texture);
 				}
 				if (Map[i][j] == 'E')continue;
 				if (Map[i][j] == 'P')continue;

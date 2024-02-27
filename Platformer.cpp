@@ -13,10 +13,9 @@ void Death(RenderWindow& win, Event& event)
 	RectangleShape death_screen;
 	death_screen.setSize(Vector2f(1920, 1080));
 	Texture death_screen_texture;
-	death_screen_texture.loadFromFile("Death_screen.png");
+	death_screen_texture.loadFromFile("Assets/Menu/Death_screen.png");
 	death_screen.setTexture(&death_screen_texture);
-	float cooldown = 0;
-	ofstream pl_sv("player.data");
+	ofstream pl_sv("Assets/Player/player.data");
 	if (!pl_sv.eof())pl_sv << "1_Level";
 
 	while (win.isOpen())
@@ -27,10 +26,31 @@ void Death(RenderWindow& win, Event& event)
 			if (event.type == Event::Closed) win.close();
 		}
 
-		cooldown += 0.2;
-		if (cooldown == 5)win.close();
-
 		win.draw(death_screen);
+		win.display();
+	}
+}
+
+
+void Win(RenderWindow& win, Event& event)
+{
+	RectangleShape win_screen;
+	win_screen.setSize(Vector2f(1920, 1080));
+	Texture win_screen_texture;
+	win_screen_texture.loadFromFile("Assets/Menu/win_screen.png");
+	win_screen.setTexture(&win_screen_texture);
+	ofstream pl_sv("Assets/Player/player.data");
+	if (!pl_sv.eof())pl_sv << "1_Level";
+
+	while (win.isOpen())
+	{
+		while (win.pollEvent(event))
+		{
+			if (Keyboard::isKeyPressed(Keyboard::Escape))win.close();
+			if (event.type == Event::Closed) win.close();
+		}
+
+		win.draw(win_screen);
 		win.display();
 	}
 }
@@ -39,14 +59,11 @@ bool Start_game(RenderWindow& win, Level& temp, Event& event)
 {
 	RectangleShape font;
 	Texture font_texture;
-	font_texture.loadFromFile("1_Level_font.png");
-	font.setSize(Vector2f(1920, 1080));
-	font.setTexture(&font_texture);
 
 
 	Texture buttons;
 
-	buttons.loadFromFile("buttons.png");
+	buttons.loadFromFile("Assets/Menu/buttons.png");
 
 	Sprite new_game;
 	Sprite continue_game;
@@ -69,10 +86,15 @@ bool Start_game(RenderWindow& win, Level& temp, Event& event)
 	exit_game.setPosition(850, 555);
 
 
-	ifstream player_data("player.data");
+	ifstream player_data("Assets/Player/player.data");
 	string save;
 
 	if(!player_data.eof())getline(player_data, save);
+
+
+	font_texture.loadFromFile("Assets/Map/fonts/" + save + "_font.png");
+	font.setSize(Vector2f(1920, 1080));
+	font.setTexture(&font_texture);
 
 	while (win.isOpen())
 	{
@@ -147,17 +169,17 @@ int main()
 	{
 		//Спрайт игрока
 		Texture player_texture;
-		player_texture.loadFromFile("test.png");
+		player_texture.loadFromFile("Assets/Player/rimuru_template.png");
 		Player player(player_texture, temp);
 
 		//Спрайт оружия игрока
 		Texture wep_texture;
-		wep_texture.loadFromFile("weapon_template.png");
+		wep_texture.loadFromFile("Assets/Player/weapon_template.png");
 		player.sword.wep_t.setTexture(wep_texture);
 
 		//Спрайт врага
 		Texture enemy_texture;
-		enemy_texture.loadFromFile("enemy_template1.png");
+		enemy_texture.loadFromFile("Assets/Enemy/enemy_template1.png");
 
 		//объект стены
 		RectangleShape wall(Vector2f(temp.b_s, temp.b_s));
@@ -194,6 +216,7 @@ int main()
 
 			if (player.hp > 0)
 			{
+				if (player.win) Win(win, event);
 				temp.mapDisplay(wall, win, offset_x, offset_y);
 				player.update(time, Enemy_list);
 				win.draw(player.sprite);
